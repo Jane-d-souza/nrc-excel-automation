@@ -69,14 +69,12 @@ def copy_cells(source_ws,target_ws):
         if source_cell.comment:
             target_cell.comment = copy(source_cell.comment)
 
-
-
-
-
 copy_sheet(source_ws,target_ws)
 
 if 'Sheet' in target_wb.sheetnames:  # remove default sheet
     target_wb.remove(target_wb['Sheet'])
 
 target_wb.save('ATAC Project Dashboard APR 2025.xlsx')
+
+#----------------END OF COPY FUNCTIONS----------------------------------
 
