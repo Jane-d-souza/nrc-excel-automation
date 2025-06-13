@@ -103,6 +103,32 @@ aj21_value =  financial_ws['AJ21'].value
 presentation_ws['H22'].value = aj17_value + aj21_value
 
 
-target_wb.save('ATAC Project Dashboard Trial March.xlsx')
 
-# --- Custom cell logic for "Presentation Working Sheet" LABOUR + TRAVEL ESTIMATE-----
+# --- Custom cell logic for "Presentation Working Sheet" LABOUR + TRAVEL ACTUALS-----
+
+presentation_ws['H40'].value = aj17_value
+presentation_ws['H41'].value = aj21_value
+
+
+# --- Custom cell logic for "Presentation Working Sheet" NRE + SI -----
+
+# Sum G53 and H53 in Presentation and put result in G53
+g53 = presentation_ws['G53'].value or 0
+h53 = presentation_ws['H53'].value or 0
+try:
+    g53_num = float(g53)
+except (TypeError, ValueError):
+    g53_num = 0
+try:
+    h53_num = float(h53)
+except (TypeError, ValueError):
+    h53_num = 0
+presentation_ws['G53'].value = g53_num + h53_num
+
+# Replace H53 with value from AJ35 in financial report
+aj35_value = financial_ws['AJ35'].value
+presentation_ws['H53'].value = aj35_value
+
+
+
+target_wb.save('ATAC Project Dashboard Trial March.xlsx')
