@@ -87,6 +87,22 @@ presentation_ws['G9'].value = g9 + h9
 aj31_value = financial_ws['AJ31'].value
 presentation_ws['H9'].value = aj31_value
 
-# --- Custom cell logic for "Presentation Working Sheet" ALL PHASES TABLE-----
+# --- Custom cell logic for "Presentation Working Sheet" LABOUR + TRAVEL-----
+
+g22 = presentation_ws['G22'].value
+
+# Get value from AI33 in the financial report
+ai33_value =  financial_ws['AI33'].value
+
+# Sum and put result in G22
+presentation_ws['G22'].value = g22 + ai33_value
+
+# Sum AJ17 and AJ21 from the financial report and put in H22
+aj17_value =  financial_ws['AJ17'].value
+aj21_value =  financial_ws['AJ21'].value
+presentation_ws['H22'].value = aj17_value + aj21_value
+
 
 target_wb.save('ATAC Project Dashboard Trial March.xlsx')
+
+# --- Custom cell logic for "Presentation Working Sheet" LABOUR + TRAVEL ESTIMATE-----
