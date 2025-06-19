@@ -129,6 +129,28 @@ presentation_ws['G53'].value = g53_num + h53_num
 aj35_value = financial_ws['AJ35'].value
 presentation_ws['H53'].value = aj35_value
 
+# --- Custom cell logic for "Presentation Working Sheet" In-Kind -----
+
+# Sum F65 and E65 in Presentation and put result in E65
+f65 = presentation_ws['F65'].value or 0
+e65 = presentation_ws['E65'].value or 0
+try:
+    f65_num = float(f65)
+except (TypeError, ValueError):
+    f65_num = 0
+try:
+    e65_num = float(e65)
+except (TypeError, ValueError):
+    e65_num = 0
+presentation_ws['E65'].value = f65_num + e65_num
+
+# Replace F65 with value from AJ95 in financial report
+aj95_value = financial_ws['AJ95'].value
+presentation_ws['F65'].value = aj95_value
+
+
+# --- Custom cell logic for "Presentation Working Sheet" MDA Contract Status -----
+
 
 
 target_wb.save('ATAC Project Dashboard Trial March.xlsx')
