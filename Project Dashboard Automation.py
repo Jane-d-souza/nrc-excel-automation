@@ -150,7 +150,18 @@ presentation_ws['F65'].value = aj95_value
 
 
 # --- Custom cell logic for "Presentation Working Sheet" MDA Contract Status -----
+#pull data from acutals tab
+#SKIP
 
+
+#Summary Tab
+# Copy AJ33, AJ35, AJ36 from financial report to I87, I88, I89 in Presentation Working Sheet
+aj33_value = financial_ws['AJ33'].value
+aj36_value = financial_ws['AJ36'].value
+
+presentation_ws['I87'].value = aj33_value
+presentation_ws['I88'].value = aj35_value
+presentation_ws['I89'].value = aj36_value
 
 
 target_wb.save('ATAC Project Dashboard Trial March.xlsx')
