@@ -73,9 +73,10 @@ for name in sheet_names:
     target_ws = target_wb.create_sheet(title=name)
     copy_sheet(source_ws, target_ws)
 
-# --- Custom cell logic for "Presentation Working Sheet" ALL PHASES TABLE-----
+
 presentation_ws = target_wb['Presentation Working Sheet']
 
+# --- Custom cell logic for "Presentation Working Sheet" ALL PHASES TABLE-----
 # Get original values
 g9 = presentation_ws['G9'].value or 0
 h9 = presentation_ws['H9'].value or 0
