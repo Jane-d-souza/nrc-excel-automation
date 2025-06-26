@@ -149,25 +149,86 @@ if month_col and total_row:
     section_total = financial_ws.cell(row=total_row, column=month_col).value
     print(f"{section_label} TOTAL for {target_month}:", section_total)
     
-    # Find the "Current Invoice" column for 2025 in the dashboard (header row 1)
-    dash_col = find_column_by_header(presentation_ws, "Current Invoice", header_row=1)
-    # Find the row for "2025" in the dashboard (assuming label is in column 1)
-    dash_row = None
-    for row in presentation_ws.iter_rows(min_col=1, max_col=1):
-        cell = row[0]
-        if cell.value and "2025" in str(cell.value):
-            dash_row = cell.row
-            break
+# Find columns by header (header is in row 5 in your screenshot)
+prev_inv_col = find_column_by_header(presentation_ws, "Previously Invoiced", header_row=5)
+curr_inv_col = find_column_by_header(presentation_ws, "Current Invoice", header_row=5)
 
-    if dash_col and dash_row:
-        presentation_ws.cell(row=dash_row, column=dash_col).value = section_total
-        print(f"Pasted value {section_total} to dashboard at {presentation_ws.cell(row=dash_row, column=dash_col).coordinate}")
-    else:
-        print("Could not find the 'Current Invoice' column or 2025 row in the dashboard.")
+# Find the row for 2025 (year is in column B, which is col=2)
+year_row = None
+for row in presentation_ws.iter_rows(min_row=6, max_row=20, min_col=2, max_col=2):
+    cell = row[0]
+    if cell.value and str(cell.value).strip() == "2025":
+        year_row = cell.row
+        break
+
+if prev_inv_col and curr_inv_col and year_row:
+    # Step 1: Get the original values
+    prev_val = presentation_ws.cell(row=year_row, column=prev_inv_col).value or 0
+    curr_val = presentation_ws.cell(row=year_row, column=curr_inv_col).value or 0
+    total = prev_val + curr_val
+    print(f"Sum of Previously Invoiced and Current Invoice for 2025: {total}")
+
+    # (Optional) Step 2: Update Previously Invoiced (G9) with the sum
+    presentation_ws.cell(row=year_row, column=prev_inv_col).value = total
+
+    # Step 3: Replace Current Invoice (H9) with the value from May-25
+    presentation_ws.cell(row=year_row, column=curr_inv_col).value = section_total
+    print(f"Replaced Current Invoice for 2025 with {section_total}")
 else:
-    print("Could not find the required section total in the financial report.")
+    print("Could not find required columns or row for 2025.")
 
+# --- Second Table: Revised table - Labour + Travel ---
 
+# 1. Find columns by header for the second table (adjust header_row and min_row as needed)
+labour_table_header_row = 17  # Example: change if your second table starts elsewhere
+labour_table_first_data_row = 18  # Example: change as needed
+
+prev_inv_col2 = find_column_by_header(presentation_ws, "Previously Invoiced", header_row=labour_table_header_row)
+curr_inv_col2 = find_column_by_header(presentation_ws, "Current Invoice", header_row=labour_table_header_row)
+
+# 2. Find the row for 2025 in the second table (assuming year is in column B)
+year_row2 = None
+for row in presentation_ws.iter_rows(min_row=labour_table_first_data_row, max_row=labour_table_first_data_row+10, min_col=2, max_col=2):
+    cell = row[0]
+    if cell.value and str(cell.value).strip() == "2025":
+        year_row2 = cell.row
+        break
+
+if prev_inv_col2 and curr_inv_col2 and year_row2:
+    prev_val2 = presentation_ws.cell(row=year_row2, column=prev_inv_col2).value or 0
+    curr_val2 = presentation_ws.cell(row=year_row2, column=curr_inv_col2).value or 0
+    total2 = prev_val2 + curr_val2
+    # Update Previously Invoiced with the sum
+    presentation_ws.cell(row=year_row2, column=prev_inv_col2).value = total2
+    print(f"Updated Labour+Travel Previously Invoiced for 2025: {total2}")
+else:
+    print("Could not find required columns or row for 2025 in Labour+Travel table.")
+
+# --- Get Labour + Travel from Financial Report ---
+
+# Find row numbers for Labour and Travel in the financial report
+def find_row_by_label(ws, label, label_col=1):
+    for row in ws.iter_rows(min_col=label_col, max_col=label_col):
+        cell = row[0]
+        if cell.value and label.lower() in str(cell.value).lower():
+            return cell.row
+    return None
+
+labour_row = find_row_by_label(financial_ws, "labour", label_col=1)
+travel_row = find_row_by_label(financial_ws, "travel", label_col=1)
+
+if month_col and labour_row and travel_row:
+    labour_val = financial_ws.cell(row=labour_row, column=month_col).value or 0
+    travel_val = financial_ws.cell(row=travel_row, column=month_col).value or 0
+    sum_labour_travel = (labour_val or 0) + (travel_val or 0)
+    print(f"Labour + Travel for {target_month}: {sum_labour_travel}")
+
+    # Update Current Invoice for 2025 in the dashboard's second table
+    if curr_inv_col2 and year_row2:
+        presentation_ws.cell(row=year_row2, column=curr_inv_col2).value = sum_labour_travel
+        print(f"Updated Labour+Travel Current Invoice for 2025 with {sum_labour_travel}")
+else:
+    print("Could not find Labour/Travel rows or month column in financial report.")
 
 target_wb.save('ATAC Project Dashboard Trial May.xlsx')
 
