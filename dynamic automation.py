@@ -117,10 +117,14 @@ def find_row_by_label(ws, label, label_col=1):
     return None
 # --- Main Script ---
 # Financial Source Workbook
+#financial_wb = load_workbook(r'C:\Users\Dsouzaj\Downloads\Automation excels\April\ATAC NRC Financial Report Apr 2025.xlsx', data_only=True)
 financial_wb = load_workbook(r'C:\Users\Dsouzaj\Downloads\Automation excels\May\ATAC NRC Financial Report May 2025 (1).xlsx', data_only=True)
+
 financial_ws = financial_wb['USD Monthly Totals']
 
 # Dashboard Template Workbook
+
+#source_wb = load_workbook(r'C:\Users\Dsouzaj\Downloads\Automation excels\March\ATAC Project Dashbaord_Apr04, 25 (1).xlsx')
 source_wb = load_workbook(r'C:\Users\Dsouzaj\Downloads\Automation excels\April\ATAC Project Dashbaord_May30, 25 with updated projections (1).xlsx')
 sheet_names = ['Presentation Working Sheet', 'NRC ATAC All Phases', 'CAD to USD Savings']
 
@@ -141,7 +145,7 @@ presentation_ws = target_wb['Presentation Working Sheet']
 
 # --- Custom cell logic for "Presentation Working Sheet" ALL PHASES TABLE-----
 
-target_month = "May-25"
+target_month = "Apr-25"
 section_label = "ATAC Total Billable"
 
 # Find the column for May-25 in the financial report
@@ -233,14 +237,14 @@ if month_col and curr_inv_col2 and year_row2 and prev_inv_col2:
 
     # Step 1: Update Previously Invoiced with the sum
     presentation_ws.cell(row=year_row2, column=prev_inv_col2).value = total2
-    print(f"Updated Labour+Travel Previously Invoiced for 2025: {total2}")
+    print(f"Table #2: Updated Labour+Travel Previously Invoiced for 2025: {total2}")
 
     # Step 2: Update Current Invoice for 2025 in the dashboard's second table
     labour_val = get_numeric(financial_ws, labour_row, month_col)
     travel_val = get_numeric(financial_ws, travel_row, month_col)
     sum_labour_travel = labour_val + travel_val
     presentation_ws.cell(row=year_row2, column=curr_inv_col2).value = sum_labour_travel
-    print(f"Updated Labour+Travel Current Invoice for 2025 with {sum_labour_travel}")
+    print(f"Table #2: Updated Labour+Travel Current Invoice for 2025 with {sum_labour_travel}")
 else:
     print("Could not find required columns, rows, or month for Labour+Travel table.")
 
