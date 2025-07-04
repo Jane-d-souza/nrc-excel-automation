@@ -147,7 +147,7 @@ financial_ws = financial_wb['USD Monthly Totals']
 # Dashboard Template Workbook
 
 #source_wb = load_workbook(r'C:\Users\Dsouzaj\Downloads\Automation excels\March\ATAC Project Dashbaord_Apr04, 25 (1).xlsx')
-source_wb = load_workbook(r'C:\Users\Dsouzaj\Downloads\Automation excels\April\ATAC Project Dashbaord_May30, 25 with updated projections (1).xlsx')
+source_wb = load_workbook(r'C:\Users\Dsouzaj\Downloads\Automation excels\April\ATAC Project Dashbaord_May30, 25 with updated projections (1).xlsx', data_only=True)
 sheet_names = ['Presentation Working Sheet', 'NRC ATAC All Phases', 'CAD to USD Savings']
 
 # Target Workbook
@@ -422,22 +422,72 @@ if prev_amt_col and curr_amt_col and inkind_2025_row:
     presentation_ws.cell(row=inkind_2025_row, column=prev_amt_col).value = total_val
     print(f"In-Kind Table: Updated Previously Amount for 2025: {total_val}")
 
-    # Step 2: Get the TOTAL value for May-25 from the financial report's ATAC In-Kind section
-    # Find the "TOTAL" row in the ATAC In-Kind section (label in column A)
-    inkind_total_row = find_row_by_label(financial_ws, "TOTAL", label_col=1)
-    may25_col = find_column_by_month(financial_ws, "May-25", header_row=1)  # Adjust header_row if needed
-    if inkind_total_row and may25_col:
-        inkind_val = get_numeric(financial_ws, inkind_total_row, may25_col)
-        presentation_ws.cell(row=inkind_2025_row, column=curr_amt_col).value = inkind_val
-        print(f"In-Kind Table: Updated Current Amount for 2025 with {inkind_val}")
-    else:
-        print("Could not find TOTAL row or May-25 column in ATAC In-Kind section.")
+# 1. Find section row
+section_row = None
+for row in financial_ws.iter_rows(min_col=1, max_col=1):
+    cell = row[0]
+    if cell.value and "atac total in-kind" in str(cell.value).lower():
+        section_row = cell.row
+        print(f"Found section at row {section_row}: {cell.value}")
+        break
+
+# 2. Find TOTAL row
+total_row = None
+if section_row:
+    for row in financial_ws.iter_rows(min_row=section_row+1, min_col=1, max_col=1):
+        cell = row[0]
+        print(f"Checking row {cell.row}: {repr(cell.value)}")
+        if cell.value and str(cell.value).strip().upper() == "TOTAL":
+            total_row = cell.row
+            print(f"Found TOTAL at row {total_row}")
+            break
+
+# 3. Find May-25 column
+month_col = find_column_by_month(financial_ws, "May-25", header_row=85)  # Adjust header_row if needed
+print(f"May-25 column: {month_col}")
+
+# 4. Get value and paste to dashboard
+if total_row and month_col and inkind_2025_row and curr_amt_col:
+    total_val = financial_ws.cell(row=total_row, column=month_col).value
+    print(f"TOTAL value for May-25: {total_val}")
+    presentation_ws.cell(row=inkind_2025_row, column=curr_amt_col).value = total_val
+    print(f"Pasted {total_val} to dashboard row {inkind_2025_row}, col {curr_amt_col}")
 else:
-    print("Could not find required columns or row for In-Kind Table.")
+    print("Could not find TOTAL row, May-25 column, inkind_2025_row, or curr_amt_col.")
 
 
+#----------SKIP CALL UP TABLE-----------
 
+#-----------SUMMARY TABLE-------------
 
+# Find month column in financial report and dashboard
+month_col = find_column_by_month(financial_ws, "May-25", header_row=3)
+dash_month_col = find_column_by_header(presentation_ws, "May-25", header_row= 104 )  # Set this
+
+# Find rows in financial report
+labour_row = find_row_by_label(financial_ws, "Labour", label_col=1)
+travel_row = find_row_by_label(financial_ws, "Travel", label_col=1)
+nre_row = find_row_by_label(financial_ws, "NRE & SI", label_col=1)
+
+# Get values
+labour_val = get_numeric(financial_ws, labour_row, month_col)
+travel_val = get_numeric(financial_ws, travel_row, month_col)
+nre_val = get_numeric(financial_ws, nre_row, month_col)
+sum_labour_travel = labour_val + travel_val
+
+# Find dashboard rows
+labour_travel_dash_row = find_row_by_label(presentation_ws, "Labour+Travel", label_col=2)
+nre_dash_row = find_row_by_label(presentation_ws, "NRE & SI", label_col=2)
+
+# Paste values
+if labour_travel_dash_row and dash_month_col:
+    presentation_ws.cell(row=labour_travel_dash_row, column=dash_month_col).value = sum_labour_travel
+    print(f"Pasted Labour+Travel {sum_labour_travel} to dashboard at row {labour_travel_dash_row}, col {dash_month_col}")
+
+print(f'NRE+SI value: {nre_val}')
+if nre_dash_row and dash_month_col:
+    presentation_ws.cell(row=nre_dash_row, column=dash_month_col).value = nre_val
+    print(f"Pasted NRE & SI {nre_val} to dashboard at row {nre_dash_row}, col {dash_month_col}")
 
 
 
