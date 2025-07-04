@@ -386,7 +386,54 @@ else:
 
 # -------------IN-KIND TABLE--------------
 
+# --- In-Kind Table Update ---
 
+# Dashboard: Find columns for "Previously Amount" and "Current Amount" in the In-Kind table
+inkind_table_header_row = 71  # Row with headers in dashboard (adjust if needed)
+inkind_table_first_data_row = 73  # First year row (2023), so 2025 is at row 75
+
+prev_amt_col = find_column_by_header(presentation_ws, "Previously Amount", header_row=inkind_table_header_row)
+curr_amt_col = find_column_by_header(presentation_ws, "Current Amount", header_row=inkind_table_header_row)
+
+# Find the row for 2025 in the In-Kind table (column B)
+inkind_2025_row = None
+for row in presentation_ws.iter_rows(min_row=inkind_table_first_data_row, max_row=inkind_table_first_data_row+10, min_col=2, max_col=2):
+    cell = row[0]
+    if cell.value and str(cell.value).strip() == "2025":
+        inkind_2025_row = cell.row
+        break
+    if cell.value and isinstance(cell.value, int) and cell.value == 2025:
+        inkind_2025_row = cell.row
+        break
+
+if prev_amt_col and curr_amt_col and inkind_2025_row:
+    # Step 1: Add current amount to previous amount and update
+    prev_val = presentation_ws.cell(row=inkind_2025_row, column=prev_amt_col).value or 0
+    curr_val = presentation_ws.cell(row=inkind_2025_row, column=curr_amt_col).value or 0
+    try:
+        prev_val = float(str(prev_val).replace(",", ""))
+    except Exception:
+        prev_val = 0
+    try:
+        curr_val = float(str(curr_val).replace(",", ""))
+    except Exception:
+        curr_val = 0
+    total_val = prev_val + curr_val
+    presentation_ws.cell(row=inkind_2025_row, column=prev_amt_col).value = total_val
+    print(f"In-Kind Table: Updated Previously Amount for 2025: {total_val}")
+
+    # Step 2: Get the TOTAL value for May-25 from the financial report's ATAC In-Kind section
+    # Find the "TOTAL" row in the ATAC In-Kind section (label in column A)
+    inkind_total_row = find_row_by_label(financial_ws, "TOTAL", label_col=1)
+    may25_col = find_column_by_month(financial_ws, "May-25", header_row=1)  # Adjust header_row if needed
+    if inkind_total_row and may25_col:
+        inkind_val = get_numeric(financial_ws, inkind_total_row, may25_col)
+        presentation_ws.cell(row=inkind_2025_row, column=curr_amt_col).value = inkind_val
+        print(f"In-Kind Table: Updated Current Amount for 2025 with {inkind_val}")
+    else:
+        print("Could not find TOTAL row or May-25 column in ATAC In-Kind section.")
+else:
+    print("Could not find required columns or row for In-Kind Table.")
 
 
 
