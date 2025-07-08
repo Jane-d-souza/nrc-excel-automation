@@ -147,7 +147,7 @@ financial_ws = financial_wb['USD Monthly Totals']
 # Dashboard Template Workbook
 
 #source_wb = load_workbook(r'C:\Users\Dsouzaj\Downloads\Automation excels\March\ATAC Project Dashbaord_Apr04, 25 (1).xlsx')
-source_wb = load_workbook(r'C:\Users\Dsouzaj\Downloads\Automation excels\April\ATAC Project Dashbaord_May30, 25 with updated projections (1).xlsx', data_only=True)
+source_wb = load_workbook(r'C:\Users\Dsouzaj\Downloads\Automation excels\April\ATAC Project Dashbaord_May30, 25 with updated projections (1).xlsx')
 sheet_names = ['Presentation Working Sheet', 'NRC ATAC All Phases', 'CAD to USD Savings']
 
 # Target Workbook
@@ -468,38 +468,28 @@ dash_month_col = find_column_by_header(presentation_ws, "May-25", header_row= 10
 labour_row = find_row_by_label(financial_ws, "Labour", label_col=1)
 travel_row = find_row_by_label(financial_ws, "Travel", label_col=1)
 nre_row = find_row_by_label(financial_ws, "NRE & SI", label_col=1)
+bom_row = find_row_by_label(financial_ws, "BOM", label_col=1)
 
 # Get values
 labour_val = get_numeric(financial_ws, labour_row, month_col)
 travel_val = get_numeric(financial_ws, travel_row, month_col)
 nre_val = get_numeric(financial_ws, nre_row, month_col)
 sum_labour_travel = labour_val + travel_val
+bom_val = 
 
 # Find dashboard rows
 labour_travel_dash_row = find_row_by_label(presentation_ws, "Labour+Travel", label_col=2)
-nre_dash_row = find_row_by_label(presentation_ws, "NRE & SI", label_col=2)
+nre_dash_row = find_row_by_label(presentation_ws, "NRE + SI", label_col=2)
 
 # Paste values
 if labour_travel_dash_row and dash_month_col:
-    presentation_ws.cell(row=labour_travel_dash_row, column=dash_month_col).value = sum_labour_travel
-    print(f"Pasted Labour+Travel {sum_labour_travel} to dashboard at row {labour_travel_dash_row}, col {dash_month_col}")
+    presentation_ws.cell(row=labour_travel_dash_row, column=dash_month_col).value = round(sum_labour_travel)
+    print(f"Pasted Labour+Travel {round(sum_labour_travel)} to dashboard at row {labour_travel_dash_row}, col {dash_month_col}")
 
-print(f'NRE+SI value: {nre_val}')
+
 if nre_dash_row and dash_month_col:
-    presentation_ws.cell(row=nre_dash_row, column=dash_month_col).value = nre_val
+    presentation_ws.cell(row=nre_dash_row, column=dash_month_col).value = round(nre_val)
     print(f"Pasted NRE & SI {nre_val} to dashboard at row {nre_dash_row}, col {dash_month_col}")
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
