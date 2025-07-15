@@ -3,53 +3,7 @@ from copy import copy
 from datetime import datetime
 import os 
 
-#-----------COPY FUNCTIONS--------------
-def copy_sheet(source_ws, target_ws):
-    copy_cells(source_ws, target_ws)
-    copy_sheet_attributes(source_ws, target_ws)
 
-def copy_sheet_attributes(source_ws, target_ws):
-    target_ws.sheet_format = copy(source_ws.sheet_format)
-    target_ws.sheet_properties = copy(source_ws.sheet_properties)
-    target_ws.merged_cells = copy(source_ws.merged_cells)
-    target_ws.page_margins = copy(source_ws.page_margins)
-    target_ws.freeze_panes = copy(source_ws.freeze_panes)
-
-    for rn in range(len(source_ws.row_dimensions)):
-        target_ws.row_dimensions[rn] = copy(source_ws.row_dimensions[rn])
-
-    if source_ws.sheet_format.defaultColWidth is None:
-        print('Unable to copy default column wide')
-    else:
-        target_ws.sheet_format.defaultColWidth = copy(source_ws.sheet_format.defaultColWidth)
-
-    for key, value in source_ws.column_dimensions.items():
-        target_ws.column_dimensions[key].min = copy(value.min)
-        target_ws.column_dimensions[key].max = copy(value.max)
-        target_ws.column_dimensions[key].width = copy(value.width)
-        target_ws.column_dimensions[key].hidden = copy(value.hidden)
-
-def copy_cells(source_ws, target_ws):
-    for (row, col), source_cell in source_ws._cells.items():
-        target_cell = target_ws.cell(column=col, row=row)
-        target_cell._value = source_cell._value
-        target_cell.data_type = source_cell.data_type
-
-        if source_cell.has_style:
-            target_cell.font = copy(source_cell.font)
-            target_cell.border = copy(source_cell.border)
-            target_cell.fill = copy(source_cell.fill)
-            target_cell.number_format = copy(source_cell.number_format)
-            target_cell.protection = copy(source_cell.protection)
-            target_cell.alignment = copy(source_cell.alignment)
-
-        if source_cell.hyperlink:
-            target_cell._hyperlink = copy(source_cell.hyperlink)
-
-        if source_cell.comment:
-            target_cell.comment = copy(source_cell.comment)
-
-#-----------END OF COPY FUNCTIONS--------------
 def find_column_by_month(ws, month_label, header_row=3):
     """
     Find the column index for a given month label in the header row.
@@ -146,21 +100,8 @@ financial_ws = financial_wb['USD Monthly Totals']
 
 # Dashboard Template Workbook
 
-#source_wb = load_workbook(r'C:\Users\Dsouzaj\Downloads\Automation excels\March\ATAC Project Dashbaord_Apr04, 25 (1).xlsx')
-source_wb = load_workbook(r'C:\Users\Dsouzaj\Downloads\Automation excels\April\ATAC Project Dashbaord_May30, 25 with updated projections (1).xlsx')
-sheet_names = ['Presentation Working Sheet', 'NRC ATAC All Phases', 'CAD to USD Savings']
 
-# Target Workbook
-target_wb = Workbook()
-if 'Sheet' in target_wb.sheetnames:
-    std = target_wb['Sheet']
-    target_wb.remove(std)
-
-# Loop through each sheet and copy
-for name in sheet_names:
-    source_ws = source_wb[name]
-    target_ws = target_wb.create_sheet(title=name)
-    copy_sheet(source_ws, target_ws)
+target_wb = load_workbook(r'C:\Users\Dsouzaj\Downloads\Automation excels\April\ATAC Project Dashbaord_May30, 25 with updated projections (1).xlsx')
 
 
 presentation_ws = target_wb['Presentation Working Sheet']
@@ -168,6 +109,9 @@ presentation_ws = target_wb['Presentation Working Sheet']
 # --- Custom cell logic for "Presentation Working Sheet" ALL PHASES TABLE-----
 
 target_month = "May-25"
+
+
+
 section_label = "ATAC Total Billable"
 
 # Find the column for May-25 in the financial report
@@ -475,11 +419,12 @@ labour_val = get_numeric(financial_ws, labour_row, month_col)
 travel_val = get_numeric(financial_ws, travel_row, month_col)
 nre_val = get_numeric(financial_ws, nre_row, month_col)
 sum_labour_travel = labour_val + travel_val
-bom_val = 
+bom_val = get_numeric(financial_ws,bom_row, month_col)
 
 # Find dashboard rows
 labour_travel_dash_row = find_row_by_label(presentation_ws, "Labour+Travel", label_col=2)
 nre_dash_row = find_row_by_label(presentation_ws, "NRE + SI", label_col=2)
+bom_dash_row = find_row_by_label(presentation_ws, "BOM", label_col=2)
 
 # Paste values
 if labour_travel_dash_row and dash_month_col:
@@ -491,10 +436,12 @@ if nre_dash_row and dash_month_col:
     presentation_ws.cell(row=nre_dash_row, column=dash_month_col).value = round(nre_val)
     print(f"Pasted NRE & SI {nre_val} to dashboard at row {nre_dash_row}, col {dash_month_col}")
 
+if bom_dash_row and dash_month_col:
+    presentation_ws.cell(row=bom_dash_row, column=dash_month_col).value = round(bom_val)
+    print(f"Pasted BOM {bom_val} to dashboard at row {bom_dash_row}, col {dash_month_col}")
 
 
-
-target_wb.save('ATAC Project Dashboard Trial May.xlsx')
+target_wb.save(r"C:\Users\Dsouzaj\Documents\NRC Python Files\Project Dashboard Automation Repo\ATAC Project Dashboard Trial May.xlsx")
 
 
 
