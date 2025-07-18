@@ -93,22 +93,22 @@ def find_row_by_label_after(ws, label, after_row, label_col=1):
     return None
 # --- Main Script ---
 # Financial Source Workbook
-#financial_wb = load_workbook(r'C:\Users\Dsouzaj\Downloads\Automation excels\April\ATAC NRC Financial Report Apr 2025.xlsx', data_only=True)
-financial_wb = load_workbook(r'C:\Users\Dsouzaj\Downloads\Automation excels\May\ATAC NRC Financial Report May 2025 (1).xlsx', data_only=True)
+
+financial_wb = load_workbook(r'C:\Users\Dsouzaj\Downloads\Automation excels\June\ATAC NRC Financial Report June 2025.xlsx', data_only=True)
 
 financial_ws = financial_wb['USD Monthly Totals']
 
 # Dashboard Template Workbook
 
 
-target_wb = load_workbook(r'C:\Users\Dsouzaj\Downloads\Automation excels\April\ATAC Project Dashbaord_May30, 25 with updated projections (1).xlsx')
+target_wb = load_workbook(r'C:\Users\Dsouzaj\Downloads\Automation excels\June\Dasboard_May.xlsx')
 
 
 presentation_ws = target_wb['Presentation Working Sheet']
 
 # --- Custom cell logic for "Presentation Working Sheet" ALL PHASES TABLE-----
 
-target_month = "May-25"
+target_month = "Jun-25"
 
 
 
@@ -139,18 +139,30 @@ for row in presentation_ws.iter_rows(min_row=6, max_row=20, min_col=2, max_col=2
         break
 
 if prev_inv_col and curr_inv_col and year_row:
-    # Step 1: Get the original values
+# Step 1: Get the CURRENT invoice value BEFORE overwriting it
+    original_curr_val = presentation_ws.cell(row=year_row, column=curr_inv_col).value or 0
     prev_val = presentation_ws.cell(row=year_row, column=prev_inv_col).value or 0
-    curr_val = presentation_ws.cell(row=year_row, column=curr_inv_col).value or 0
-    total = prev_val + curr_val
-    print(f"Table #1: Sum of Previously Invoiced and Current Invoice for 2025: {total}")
 
-    # (Optional) Step 2: Update Previously Invoiced (G9) with the sum
-    presentation_ws.cell(row=year_row, column=prev_inv_col).value = total
+    # Convert to float if needed
+    try:
+        prev_val = float(str(prev_val).replace(",", ""))
+    except Exception:
+        prev_val = 0
+    try:
+        curr_val = float(str(curr_val).replace(",", ""))
+    except Exception:
+        curr_val = 0
 
-    # Step 3: Replace Current Invoice (H9) with the value from May-25
+    # Step 2: Add original Current Invoice to Previously Invoiced
+    new_prev_val = prev_val + original_curr_val
+    presentation_ws.cell(row=year_row, column=prev_inv_col).value = new_prev_val
+    print(f"Table #1: Updated Previously Invoiced (added {original_curr_val}) → {new_prev_val}")
+
+
+    # Step 3: Replace Current Invoice with the new value from financial report
     presentation_ws.cell(row=year_row, column=curr_inv_col).value = section_total
     print(f"Table #1: Replaced Current Invoice for 2025 with {section_total}")
+
 else:
     print("Could not find required columns or row for 2025.")
 
@@ -386,27 +398,25 @@ if section_row:
             print(f"Found TOTAL at row {total_row}")
             break
 
-# 3. Find May-25 column
-month_col = find_column_by_month(financial_ws, "May-25", header_row=85)  # Adjust header_row if needed
-print(f"May-25 column: {month_col}")
+# 3. Find column for the target month
+month_col = find_column_by_month(financial_ws, target_month, header_row=85)  # Adjust header_row if needed
+print(f"{target_month} column: {month_col}")
 
 # 4. Get value and paste to dashboard
 if total_row and month_col and inkind_2025_row and curr_amt_col:
     total_val = financial_ws.cell(row=total_row, column=month_col).value
-    print(f"TOTAL value for May-25: {total_val}")
+    print(f"TOTAL value for {target_month}: {total_val}")
     presentation_ws.cell(row=inkind_2025_row, column=curr_amt_col).value = total_val
     print(f"Pasted {total_val} to dashboard row {inkind_2025_row}, col {curr_amt_col}")
 else:
-    print("Could not find TOTAL row, May-25 column, inkind_2025_row, or curr_amt_col.")
-
-
+    print(f"Could not find TOTAL row, {target_month} column, inkind_2025_row, or curr_amt_col.")
 #----------SKIP CALL UP TABLE-----------
 
 #-----------SUMMARY TABLE-------------
 
 # Find month column in financial report and dashboard
-month_col = find_column_by_month(financial_ws, "May-25", header_row=3)
-dash_month_col = find_column_by_header(presentation_ws, "May-25", header_row= 104 )  # Set this
+month_col = find_column_by_month(financial_ws, target_month, header_row=3)
+dash_month_col = find_column_by_header(presentation_ws, target_month, header_row= 104 )  # Set this
 
 # Find rows in financial report
 labour_row = find_row_by_label(financial_ws, "Labour", label_col=1)
@@ -441,7 +451,8 @@ if bom_dash_row and dash_month_col:
     print(f"Pasted BOM {bom_val} to dashboard at row {bom_dash_row}, col {dash_month_col}")
 
 
-target_wb.save(r"C:\Users\Dsouzaj\Documents\NRC Python Files\Project Dashboard Automation Repo\ATAC Project Dashboard Trial May.xlsx")
+target_wb.save(r"C:\Users\Dsouzaj\Downloads\Automation excels\June\Updated_Dashboard_June25.xlsx")
+
 
 
 
